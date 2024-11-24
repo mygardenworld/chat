@@ -5,8 +5,8 @@ const url = require("url");
 
 // 常量定义
 const PORT = 5500;
-const KNOWLEDGE_ID = "1859948895166234624"; // 替换为实际的知识库ID
-const TOKEN = "23f5e2b1b00de0b6ac876916a78ca467.AGT6wnQ4m00jHCSB"; // 替换为实际的token
+const KNOWLEDGE_ID = ""; // 替换为实际的知识库ID
+const TOKEN = ""; // 替换为实际的token
 
 // 解析输入函数
 function parseInput(message) {
