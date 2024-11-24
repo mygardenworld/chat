@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>销售助手小艺</title>
+    <style>
+      body {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      #chat-container {
+        height: 400px;
+        border: 1px solid #ccc;
+        padding: 10px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+      }
+      #input-container {
+        display: flex;
+        gap: 10px;
+      }
+      #message-input {
+        flex: 1;
+        padding: 8px;
+      }
+      button {
+        padding: 8px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>销售助手小艺</h1>
+    <div id="chat-container"></div>
+    <div id="input-container">
+      <input type="text" id="message-input" placeholder="请输入您的问题..." />
+      <button onclick="sendMessage()">发送</button>
+    </div>
+
+    <script>
+      const chatContainer = document.getElementById("chat-container");
+      const messageInput = document.getElementById("message-input");
+
+      function appendMessage(content, isUser = false) {
+        const div = document.createElement("div");
+        div.style.marginBottom = "10px";
+        div.style.textAlign = isUser ? "right" : "left";
+        div.style.color = isUser ? "#007bff" : "#000";
+        div.textContent = content;
+        chatContainer.appendChild(div);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      async function sendMessage() {
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        appendMessage(`我: ${message}`, true);
+        messageInput.value = "";
+
+        try {
+          const response = await fetch("/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message }),
+          });
+
+          const reader = response.body.getReader();
+          let responseText = "";
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const text = new TextDecoder().decode(value);
+            responseText += text;
+
+            // 更新显示的回复
+            const existingResponse = chatContainer.lastChild;
+            if (
+              existingResponse &&
+              !existingResponse.classList.contains("user-message")
+            ) {
+              existingResponse.textContent = `小艺: ${responseText}`;
+            } else {
+              appendMessage(`小艺: ${responseText}`);
+            }
+          }
+        } catch (error) {
+          console.error("发送消息时出错:", error);
+          appendMessage("发送消息时出错，请重试");
+        }
+      }
+
+      // 添加回车键发送功能
+      messageInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          sendMessage();
+        }
+      });
+    </script>
+  </body>
+</html>
